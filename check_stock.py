@@ -37,6 +37,12 @@ def check_puma_stock():
             print(f"Total labels found: {len(labels)}")
             for label in labels:
                 text = label.inner_text().strip()
+                input_id = label.get_attribute("for")
+                if input_id:
+                    input_el = page.locator(f"#{input_id}")
+                    class_attr = input_el.get_attribute("class") if input_el.count() > 0 else "N/A"
+                    is_disabled = input_el.is_disabled() if input_el.count() > 0 else "N/A"
+                    print(f"Label: '{text}' | for='{input_id}' | disabled={is_disabled} | class='{class_attr}'")
                 if text in target_sizes:
                     print(f"Found label '{text}'.")
 
