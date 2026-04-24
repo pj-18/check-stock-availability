@@ -42,3 +42,7 @@ jobs:
             Good news! The PUMA x RCB 2026 Men's VK18 Official Jersey in size(s): ${{ steps.check_script.outputs.available_sizes }} is currently available.
             
             Buy it now: https://in.puma.com/in/en/pd/puma-x-rcb-2026-mens-vk18-official-jersey/714345
+
+      - name: Keepalive Workflow
+        uses: gautamkrishnar/keepalive-workflow@v2
+
