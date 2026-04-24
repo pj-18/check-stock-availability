@@ -1,0 +1,44 @@
+name: Check Puma Stock
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check-stock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          playwright install chromium
+
+      - name: Run Stock Checker Script
+        id: check_script
+        run: python check_stock.py
+
+      - name: Send Email Notification
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: '[URGENT] Puma RCB Jersey Size ${{ steps.check_script.outputs.available_sizes }} Available!'
+          to: ${{ secrets.MAIL_TO }}
+          from: GitHub Actions
+          body: |
+            Good news! The PUMA x RCB 2026 Men's VK18 Official Jersey in size(s): ${{ steps.check_script.outputs.available_sizes }} is currently available.
+            
+            Buy it now: https://in.puma.com/in/en/pd/puma-x-rcb-2026-mens-vk18-official-jersey/714345
