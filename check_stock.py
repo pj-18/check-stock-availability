@@ -4,14 +4,13 @@ import os
 
 def check_puma_stock():
     available_sizes = []
-    
-    # Read target sizes from sizes.txt
+
     try:
         with open("sizes.txt", "r") as f:
             target_sizes = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
         print("sizes.txt not found! Exiting.")
-        return available_sizes
+        return [], []
 
     
     with sync_playwright() as playwright:
@@ -45,15 +44,12 @@ def check_puma_stock():
             print(f"Page title at error: {page.title()}")
             
         browser.close()
-        return available_sizes
+        return available_sizes, target_sizes
 
 if __name__ == "__main__":
-    sizes = check_puma_stock()
-    if sizes:
-        # We write to GITHUB_OUTPUT to pass the text securely to the next step
-        if "GITHUB_OUTPUT" in os.environ:
-            with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-                f.write(f"available_sizes={', '.join(sizes)}\n")
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    sizes, checked = check_puma_stock()
+    if "GITHUB_OUTPUT" in os.environ:
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"available_sizes={', '.join(sizes)}\n")
+            f.write(f"checked_sizes={', '.join(checked)}\n")
+    sys.exit(0)

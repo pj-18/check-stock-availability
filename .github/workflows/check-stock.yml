@@ -30,8 +30,20 @@ jobs:
         id: check_script
         run: python check_stock.py
 
+      - name: Stock Status
+        run: |
+          python3 -c "
+          available = set('${{ steps.check_script.outputs.available_sizes }}'.split(', ')) if '${{ steps.check_script.outputs.available_sizes }}' else set()
+          checked = [s for s in '${{ steps.check_script.outputs.checked_sizes }}'.split(', ') if s]
+          for size in checked:
+              if size in available:
+                  print(f'IN STOCK: {size}')
+              else:
+                  print(f'OUT OF STOCK: {size} is not available')
+          "
+
       - name: Send Email Notification
-        if: success()
+        if: steps.check_script.outputs.available_sizes != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
