@@ -27,37 +27,17 @@ def check_puma_stock():
         
         try:
             page.goto(url, wait_until="networkidle", timeout=60000)
-            print(f"Page title: {page.title()}")
+            page.wait_for_selector('label[data-size]', timeout=15000)
 
-            page.screenshot(path="debug.png")
-
-            page.wait_for_selector('label', timeout=15000)
-
-            labels = page.locator('label').all()
-            print(f"Total labels found: {len(labels)}")
-            for label in labels:
-                text = label.inner_text().strip()
-                input_id = label.get_attribute("for")
-                if input_id:
-                    input_el = page.locator(f"#{input_id}")
-                    class_attr = input_el.get_attribute("class") if input_el.count() > 0 else "N/A"
-                    is_disabled = input_el.is_disabled() if input_el.count() > 0 else "N/A"
-                    print(f"Label: '{text}' | for='{input_id}' | disabled={is_disabled} | class='{class_attr}'")
-                if text in target_sizes:
-                    print(f"Found label '{text}'.")
-
-                    input_id = label.get_attribute("for")
-                    if input_id:
-                        input_el = page.locator(f"#{input_id}")
-                        if input_el.count() > 0:
-                            is_disabled = input_el.is_disabled()
-                            print(f"Input associated with '{text}' disabled state: {is_disabled}")
-
-                            if not is_disabled:
-                                print(f"STATUS: {text} IS AVAILABLE")
-                                available_sizes.append(text)
-                            else:
-                                print(f"STATUS: {text} IS OUT OF STOCK")
+            size_labels = page.locator('label[data-size]').all()
+            print(f"Size labels found: {len(size_labels)}")
+            for label in size_labels:
+                text = label.locator('span[data-content="size-value"]').inner_text().strip()
+                is_disabled = label.get_attribute("data-disabled") == "true"
+                print(f"Size: '{text}' | disabled={is_disabled}")
+                if text in target_sizes and not is_disabled:
+                    print(f"STATUS: {text} IS AVAILABLE")
+                    available_sizes.append(text)
 
         except Exception as e:
             print(f"An error occurred: {e}")
