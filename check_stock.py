@@ -22,33 +22,39 @@ def check_puma_stock():
         page = context.new_page()
         
         url = "https://in.puma.com/in/en/pd/puma-x-rcb-2026-mens-vk18-official-jersey/714345"
-        print(f"Navigating to {url}...")
+        print(f"Navigating to {url}")
         
         try:
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            print(f"Page title: {page.title()}")
+            page.screenshot(path="debug.png")
+
             page.wait_for_selector('label', timeout=15000)
-            
+
             labels = page.locator('label').all()
+            print(f"Total labels found: {len(labels)}")
             for label in labels:
                 text = label.inner_text().strip()
                 if text in target_sizes:
                     print(f"Found label '{text}'.")
-                    
+
                     input_id = label.get_attribute("for")
                     if input_id:
                         input_el = page.locator(f"#{input_id}")
                         if input_el.count() > 0:
                             is_disabled = input_el.is_disabled()
                             print(f"Input associated with '{text}' disabled state: {is_disabled}")
-                            
+
                             if not is_disabled:
                                 print(f"STATUS: {text} IS AVAILABLE")
                                 available_sizes.append(text)
                             else:
                                 print(f"STATUS: {text} IS OUT OF STOCK")
-                                
+
         except Exception as e:
             print(f"An error occurred: {e}")
+            print(f"Page URL at error: {page.url}")
+            print(f"Page title at error: {page.title()}")
             
         browser.close()
         return available_sizes
