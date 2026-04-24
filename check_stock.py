@@ -17,7 +17,8 @@ def check_puma_stock():
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080}
         )
         page = context.new_page()
         
@@ -25,8 +26,9 @@ def check_puma_stock():
         print(f"Navigating to {url}")
         
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            page.goto(url, wait_until="networkidle", timeout=60000)
             print(f"Page title: {page.title()}")
+
             page.screenshot(path="debug.png")
 
             page.wait_for_selector('label', timeout=15000)
